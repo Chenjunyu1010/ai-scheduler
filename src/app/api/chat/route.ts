@@ -136,19 +136,17 @@ export async function POST(request: NextRequest) {
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: userMessage },
       ],
-      response_format: {
-        type: "json_schema",
-        json_schema: TASK_SCHEMA,
-      },
+      response_format: { type: "json_object" },
       temperature: 0.3,
       max_tokens: 1024,
     });
 
     const raw = completion.choices?.[0]?.message?.content ?? "{}";
+    const cleaned = raw.replace(/```json/i, "").replace(/```/g, "").trim();
     let parsed: { tasks: unknown[] };
 
     try {
-      parsed = JSON.parse(raw);
+      parsed = JSON.parse(cleaned);
     } catch {
       parsed = { tasks: [] };
     }
